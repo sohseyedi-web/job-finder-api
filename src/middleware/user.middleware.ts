@@ -1,4 +1,4 @@
-import { pool } from '@/config/db';
+import { prisma } from '@/config/db';
 import { IUser } from '@/types';
 import cookieParser from 'cookie-parser';
 import { NextFunction, Request, Response } from 'express';
@@ -9,35 +9,36 @@ interface CustomRequest extends Request {
   user: IUser;
 }
 
-export const verifyAccessToken = (req: Request, res: Response, next: NextFunction) => {
+export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const accessToken = req.signedCookies['accessToken'];
-    if (!accessToken) {
-      throw createHttpError.Unauthorized('Please log in to your account.');
-    }
-    const token = cookieParser.signedCookie(accessToken, process.env.COOKIE_PARSER_SECRET_KEY!);
+    const token = req.signedCookies['accessToken'];
+    if (!token) throw createHttpError.Unauthorized('Please log in to your account.');
 
-    if (typeof token !== 'string') {
+    let payload: JwtPayload;
+    try {
+      payload = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY!) as JwtPayload;
+    } catch (err) {
       throw createHttpError.Unauthorized('Token payload is invalid.');
     }
-    JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY!, async (err, payload) => {
-      try {
-        if (err) throw createHttpError.Unauthorized('Token payload is invalid.');
-        const { _id } = payload as JwtPayload;
-        const result = await pool.query<IUser>(
-          'SELECT id,  full_name AS "fullName", email, role, is_active, created_at FROM users WHERE id = $1',
-          [_id]
-        );
-        if (result.rows.length === 0) {
-          throw createHttpError.Unauthorized('Please log in to your account.');
-        }
 
-        (req as CustomRequest).user = result.rows[0];
-        return next();
-      } catch (error) {
-        next(error);
-      }
+    if (!payload.id) throw createHttpError.Unauthorized('Token payload is invalid.');
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
     });
+
+    if (!user) throw createHttpError.Unauthorized('User not found.');
+
+    (req as CustomRequest).user = user as IUser;
+    next();
   } catch (error) {
     next(error);
   }
@@ -48,6 +49,5 @@ export function decideAuthMiddleware(req: CustomRequest, res: Response, next: Ne
   if (accessToken) {
     return verifyAccessToken(req, res, next);
   }
-  // skip this middleware
   next();
 }
