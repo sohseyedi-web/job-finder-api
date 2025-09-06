@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^6.15.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -35,6 +36,7 @@
     "@types/node": "^22.17.2",
     "@types/pg": "^8.15.5",
     "@types/socket.io": "^3.0.2",
+    "prisma": "^6.15.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.2"
