@@ -6,12 +6,14 @@ import {
   getJobApplications,
   updateApplicationStatus,
   getJobs,
+  getJobDetail,
 } from '@/controllers/job.controller';
 import { verifyAccessToken } from '@/middleware/user.middleware';
 
 const router = Router();
 
 router.get('/lists', expressAsyncHandler(getJobs));
+router.get('/detail/:jobId', expressAsyncHandler(getJobDetail as any));
 router.use(verifyAccessToken);
 router.get('/:jobId', expressAsyncHandler(getJobApplications as any));
 router.post('/create', expressAsyncHandler(createJob as any));
