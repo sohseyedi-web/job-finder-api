@@ -36,8 +36,10 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     if (file.originalname) {
       const ext = path.extname(file.originalname);
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      const fileName = `${uniqueSuffix}${ext}`;
+      const baseName = path.basename(file.originalname, ext);
+      const uniqueSuffix = Date.now();
+      const fileName = `${baseName}-${uniqueSuffix}${ext}`;
+
       (req as MulterRequest).body.filename = fileName;
       return cb(null, fileName);
     }
@@ -50,13 +52,13 @@ function imageFilter(req: Request, file: Express.Multer.File, cb: FileFilterCall
   const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 
   if (allowedExtensions.includes(ext)) return cb(null, true);
-  return cb(createError.BadRequest('فقط فرمت‌های تصویری مجاز هستند.'));
+  return cb(createError.BadRequest('Only image formats are allowed.'));
 }
 
 function pdfFilter(req: Request, file: Express.Multer.File, cb: FileFilterCallback) {
   const ext = path.extname(file.originalname).toLowerCase();
   if (ext === '.pdf') return cb(null, true);
-  return cb(createError.BadRequest('فقط فایل PDF مجاز است.'));
+  return cb(createError.BadRequest('Only PDF files are allowed.'));
 }
 
 const avatarMaxSize = 2 * 1000 * 1000;
