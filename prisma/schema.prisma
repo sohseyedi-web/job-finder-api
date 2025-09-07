@@ -15,34 +15,67 @@ enum Role {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  fullName     String
-  email         String   @unique
-  password      String
-  role          Role     @default(USER)
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  profile       Profile?
+  id        String   @id @default(cuid())
+  fullName  String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  profile   Profile?
+
+  // Relations
+  jobs         Job[]         @relation("UserJobs") // owner → Job
+  applications Application[] @relation("UserApplications") // user → Application
 }
 
 model Profile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id])
   city        String?
   phoneNumber String?
 
   // USER
-  jobTitle    String?
-  resumeUrl   String?
+  jobTitle  String?
+  resumeUrl String?
 
   // OWNER
-  companyName String?
-  companyCity String?
-  address     String?
+  companyName  String?
+  companyCity  String?
+  address      String?
   companyPhone String?
-  website     String?
-  logoUrl     String?
-  ownerPhone  String?
+  website      String?
+  logoUrl      String?
+  ownerPhone   String?
+}
+
+model Job {
+  id           String        @id @default(cuid())
+  title        String
+  description  String
+  experience   String
+  salary       String
+  city         String
+  jobType      String
+  category     String
+  ownerId      String
+  owner        User          @relation("UserJobs", fields: [ownerId], references: [id])
+  applications Application[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Application {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id])
+  userId    String
+  user      User     @relation("UserApplications", fields: [userId], references: [id])
+  fullName  String
+  email     String
+  resumeUrl String
+  status    Int      @default(0) //0: Pending, 1: Reviewed, 2: Rejected, 3: Interview approved
+  createdAt DateTime @default(now())
 }
