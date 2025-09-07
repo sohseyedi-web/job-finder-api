@@ -4,7 +4,8 @@
   "main": "app.ts",
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register src/app.ts -w",
-    "start": "node src/app.ts"
+    "start": "node src/app.ts",
+    "prisma": "npx prisma studio"
   },
   "keywords": [],
   "author": "",
