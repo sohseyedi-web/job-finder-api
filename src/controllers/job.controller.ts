@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '@/config/db';
+import { sendNotification } from '@/utils/functions';
 
 export const createJob = async (req: Request, res: Response) => {
   try {
@@ -109,6 +110,15 @@ export const applyForJob = async (req: Request, res: Response) => {
       },
     });
 
+    await sendNotification({
+      title: 'New Job Application',
+      message: `${user.fullName} applied for your job: ${job.title}`,
+      recipientId: job.ownerId,
+      senderId: user.id,
+      senderName: user.fullName,
+      type: 'JOB',
+    });
+
     res.status(201).json({ message: 'Application submitted successfully', application });
   } catch (error) {
     console.error(error);
@@ -188,6 +198,15 @@ export const updateApplicationStatus = async (req: Request, res: Response) => {
     const updated = await prisma.application.update({
       where: { id: applicationId },
       data: { status },
+    });
+
+    await sendNotification({
+      title: 'Application Status Updated',
+      message: `Your application for ${application.job.title} is now ${status}`,
+      recipientId: application.userId,
+      senderId: user.id,
+      senderName: user.fullName,
+      type: 'JOB',
     });
 
     res.status(200).json({ message: 'Application status updated', updated });
