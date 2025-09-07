@@ -136,6 +136,35 @@ export const getJobApplications = async (req: Request, res: Response) => {
   }
 };
 
+export const getMyJobApplications = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+
+    const applications = await prisma.application.findMany({
+      where: { userId: user.id },
+      include: {
+        job: {
+          select: {
+            id: true,
+            title: true,
+            city: true,
+            jobType: true,
+            category: true,
+          },
+        },
+      },
+    });
+
+    if (!applications || applications.length === 0) {
+      return res.status(404).json({ message: 'No job applications found' });
+    }
+
+    res.status(200).json({ applications });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 export const updateApplicationStatus = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
