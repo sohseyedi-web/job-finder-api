@@ -28,6 +28,7 @@ model User {
   // Relations
   jobs         Job[]         @relation("UserJobs") // owner → Job
   applications Application[] @relation("UserApplications") // user → Application
+  notifications Notification[] @relation("UserNotifications")
 }
 
 model Profile {
@@ -78,4 +79,24 @@ model Application {
   resumeUrl String
   status    Int      @default(0) //0: Pending, 1: Reviewed, 2: Rejected, 3: Interview approved
   createdAt DateTime @default(now())
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  title       String
+  message     String
+  type        NotificationType
+  recipient   User     @relation("UserNotifications", fields: [recipientId], references: [id])
+  recipientId String
+  senderId    String
+  senderName  String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum NotificationType {
+  SYSTEM
+  JOB
+  TICKET
 }
