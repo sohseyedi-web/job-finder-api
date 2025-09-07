@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { prisma } from '@/config/db';
+import { SendNotificationInput } from '@/types';
 
 dotenv.config();
 
@@ -73,4 +74,24 @@ export async function verifyRefreshToken(req: Request): Promise<User> {
 export const hashPassword = async (password: string): Promise<string> => {
   const salt = await bcrypt.genSalt(10);
   return bcrypt.hash(password, salt);
+};
+
+export const sendNotification = async ({
+  title,
+  message,
+  recipientId,
+  senderId,
+  senderName,
+  type,
+}: SendNotificationInput) => {
+  return await prisma.notification.create({
+    data: {
+      title,
+      message,
+      type,
+      recipientId,
+      senderId,
+      senderName,
+    },
+  });
 };
