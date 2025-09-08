@@ -14,10 +14,10 @@ const router = Router();
 
 router.use(verifyAccessToken);
 router.get('/requests', expressAsyncHandler(getOwnerJobLists as any));
-router.get('/:jobId', expressAsyncHandler(getJobApplications as any));
+router.get('/:id', expressAsyncHandler(getJobApplications as any));
 router.post('/', expressAsyncHandler(createJob as any));
-router.patch('/:jobId ', expressAsyncHandler(updateJob as any));
-router.delete('/:jobId :', expressAsyncHandler(deleteJob as any));
-router.patch('/:applicationId', expressAsyncHandler(updateApplicationStatus as any));
+router.patch('/:id', expressAsyncHandler(updateJob as any));
+router.delete('/:id', expressAsyncHandler(deleteJob as any));
+router.patch('/:jobId', expressAsyncHandler(updateApplicationStatus as any));
 
 export default router;
