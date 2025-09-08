@@ -10,7 +10,7 @@ router.get('/profile', expressAsyncHandler(getUserProfile));
 router.post(
   '/complete',
   (req, res, next) => {
-    if ((req as any).user?.role === 'USER') {
+    if ((req as any).user?.role !== 'OWNER') {
       return uploadPDF.single('resume')(req, res, next);
     } else if ((req as any).user?.role === 'OWNER') {
       return uploadImage.single('logo')(req, res, next);
@@ -23,7 +23,7 @@ router.post(
 router.patch(
   '/update',
   (req, res, next) => {
-    if ((req as any).user?.role === 'USER') {
+    if ((req as any).user?.role !== 'OWNER') {
       return uploadPDF.single('resume')(req, res, next);
     } else if ((req as any).user?.role === 'OWNER') {
       return uploadImage.single('logo')(req, res, next);
