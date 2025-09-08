@@ -86,3 +86,64 @@ export const getProcessesLists = async (req: Request, res: Response): Promise<vo
       .json({ statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR, message: 'Internal server error' });
   }
 };
+
+export const getAllNotifications = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+
+    if (user.role !== 'EMPLOYEE') {
+      return res
+        .status(HTTP_STATUS.FORBIDDEN)
+        .json({ message: 'Only employees can view these notifications' });
+    }
+
+    const notifications = await prisma.notification.findMany({
+      where: {
+        type: { in: ['SYSTEM', 'TICKET'] },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.status(HTTP_STATUS.OK).json({
+      message: 'Notifications fetched successfully',
+      data: notifications,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Server error' });
+  }
+};
+
+export const markNotificationAsReadForEmployee = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const { id } = req.params;
+
+    if (user.role !== 'EMPLOYEE') {
+      return res
+        .status(HTTP_STATUS.FORBIDDEN)
+        .json({ message: 'Only employees can mark these notifications' });
+    }
+
+    const notification = await prisma.notification.findFirst({
+      where: {
+        id,
+        type: { in: ['SYSTEM', 'TICKET'] },
+      },
+    });
+
+    if (!notification) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({ message: 'Notification not found' });
+    }
+
+    await prisma.notification.update({
+      where: { id },
+      data: { isRead: true },
+    });
+
+    res.status(HTTP_STATUS.OK).json({ message: 'Notification marked as read' });
+  } catch (error) {
+    console.error(error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Server error' });
+  }
+};
