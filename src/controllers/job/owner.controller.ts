@@ -43,16 +43,15 @@ export const createJob = async (req: Request, res: Response) => {
 export const deleteJob = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    const { jobId } = req.params;
-
-    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    const { id } = req.params;
+    const job = await prisma.job.findUnique({ where: { id } });
     if (!job) return res.status(404).json({ message: 'Job not found' });
 
     if (job.ownerId !== user.id) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
 
-    await prisma.job.delete({ where: { id: jobId } });
+    await prisma.job.delete({ where: { id } });
 
     res.status(200).json({ message: 'Job deleted successfully' });
   } catch (error) {
@@ -64,10 +63,11 @@ export const deleteJob = async (req: Request, res: Response) => {
 export const updateJob = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    const { jobId } = req.params;
+    const { id } = req.params;
     const { title, description, experience, salary, city, jobType, category } = req.body;
+    console.log(id);
 
-    const job = await prisma.job.findUnique({ where: { id: jobId } });
+    const job = await prisma.job.findUnique({ where: { id } });
     if (!job) return res.status(404).json({ message: 'Job not found' });
 
     if (job.ownerId !== user.id) {
@@ -75,7 +75,7 @@ export const updateJob = async (req: Request, res: Response) => {
     }
 
     const updatedJob = await prisma.job.update({
-      where: { id: jobId },
+      where: { id },
       data: {
         title: title ?? job.title,
         description: description ?? job.description,
@@ -97,10 +97,10 @@ export const updateJob = async (req: Request, res: Response) => {
 export const getJobApplications = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    const { jobId } = req.params;
+    const { id } = req.params;
 
     const job = await prisma.job.findUnique({
-      where: { id: jobId },
+      where: { id },
       include: { applications: true },
     });
 
@@ -153,7 +153,7 @@ export const getOwnerJobLists = async (req: Request, res: Response) => {
 export const updateApplicationStatus = async (req: Request, res: Response) => {
   try {
     const user = (req as any).user;
-    const { applicationId } = req.params;
+    const { jobId } = req.params;
     const { status } = req.body; // 0,1,2,3
 
     if (![0, 1, 2, 3].includes(status)) {
@@ -161,7 +161,7 @@ export const updateApplicationStatus = async (req: Request, res: Response) => {
     }
 
     const application = await prisma.application.findUnique({
-      where: { id: applicationId },
+      where: { id: jobId },
       include: { job: true },
     });
 
@@ -171,7 +171,7 @@ export const updateApplicationStatus = async (req: Request, res: Response) => {
     }
 
     const updated = await prisma.application.update({
-      where: { id: applicationId },
+      where: { id: jobId },
       data: { status },
     });
 
