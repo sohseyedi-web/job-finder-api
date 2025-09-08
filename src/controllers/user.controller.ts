@@ -21,7 +21,7 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
     let filteredProfile: any = null;
 
     if (user.profile) {
-      if (user.role === 'USER') {
+      if (user.role !== 'OWNER') {
         const { city, phoneNumber, jobTitle, resumeUrl } = user.profile;
         filteredProfile = { city, phoneNumber, jobTitle, resumeUrl };
       } else if (user.role === 'OWNER') {
@@ -75,7 +75,7 @@ export const completeProfile = async (req: Request, res: Response): Promise<void
 
     let profileData: any = {};
 
-    if (user.role === 'USER') {
+    if (user.role !== 'OWNER') {
       const { jobTitle, city, phoneNumber } = data;
       if (!jobTitle || !city || !phoneNumber || !filePath) {
         res.status(400).json({
@@ -167,7 +167,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
 
     let profileData: any = {};
 
-    if (user.role === 'USER') {
+    if (user.role !== 'OWNER') {
       const { jobTitle, city, phoneNumber } = data;
       profileData = {
         ...(jobTitle && { jobTitle }),
