@@ -8,6 +8,7 @@ export const getJobs = async (req: Request, res: Response) => {
     const jobs = await prisma.job.findMany({
       where: {
         AND: [
+          { isActive: true },
           search
             ? {
                 OR: [
