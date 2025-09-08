@@ -79,8 +79,9 @@ model Application {
   fullName  String
   email     String
   resumeUrl String
-  status    Int      @default(0) //0: Pending, 1: Reviewed, 2: Rejected, 3: Interview approved
+  status    Int      @default(0) // 0: Pending, 1: Reviewed, 2: Rejected, 3: Interview approved
   createdAt DateTime @default(now())
+  @@unique([jobId, userId]) // prevents duplicate applications for same job
 }
 
 model Notification {
