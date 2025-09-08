@@ -66,6 +66,17 @@ export const applyForJob = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'User profile with resume is required' });
     }
 
+    const existingApplication = await prisma.application.findFirst({
+      where: {
+        jobId,
+        userId: user.id,
+      },
+    });
+
+    if (existingApplication) {
+      return res.status(400).json({ message: 'You have already applied for this job' });
+    }
+
     const application = await prisma.application.create({
       data: {
         jobId,
